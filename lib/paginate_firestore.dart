@@ -78,7 +78,6 @@ class PaginateFirestore extends StatefulWidget {
 
 class _PaginateFirestoreState extends State<PaginateFirestore> {
   PaginationCubit _cubit;
-  ScrollController _scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -114,14 +113,12 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _cubit.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _scrollController = widget.scrollController ?? ScrollController();
     if (widget.listeners != null) {
       for (var listener in widget.listeners) {
         if (listener is PaginateRefreshedChangeListener) {
@@ -155,6 +152,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
       physics: widget.physics,
+      controller: widget.scrollController,
       slivers: <Widget>[
         if (widget.header != null) SliverToBoxAdapter(child: widget.header),
         SliverPadding(
