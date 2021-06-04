@@ -115,6 +115,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _cubit.dispose();
     super.dispose();
   }
 
@@ -195,6 +196,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
 
   Widget _buildListView(PaginationLoaded loadedState) {
     var listView = CustomScrollView(
+      controller: widget.scrollController,
       reverse: widget.reverse,
       shrinkWrap: widget.shrinkWrap,
       scrollDirection: widget.scrollDirection,
