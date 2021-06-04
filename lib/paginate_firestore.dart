@@ -142,7 +142,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       widget.itemsPerPage,
       widget.startAfterDocument,
       isLive: widget.isLive,
-    )..fetchPaginatedList();
+    )..fetchPaginatedList(0);
     super.initState();
   }
 
@@ -162,8 +162,12 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 if (index >= loadedState.documentSnapshots.length) {
-                  _cubit.fetchPaginatedList();
-                  return widget.bottomLoader;
+                  _cubit.fetchPaginatedList(index);
+                  if (loadedState.isLoading) {
+                    return widget.bottomLoader;
+                  } else {
+                    return SizedBox.shrink();
+                  }
                 }
                 return widget.itemBuilder(
                     index, context, loadedState.documentSnapshots[index]);
@@ -209,8 +213,12 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
                 final itemIndex = index ~/ 2;
                 if (index.isEven) {
                   if (itemIndex >= loadedState.documentSnapshots.length) {
-                    _cubit.fetchPaginatedList();
-                    return widget.bottomLoader;
+                    _cubit.fetchPaginatedList(itemIndex);
+                    if (loadedState.isLoading) {
+                      return widget.bottomLoader;
+                    } else {
+                      return SizedBox.shrink();
+                    }
                   }
                   return widget.itemBuilder(itemIndex, context,
                       loadedState.documentSnapshots[itemIndex]);
