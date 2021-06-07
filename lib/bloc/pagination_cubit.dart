@@ -56,6 +56,8 @@ class PaginationCubit extends Cubit<PaginationState> {
           .where((s) => s.metadata.isFromCache == false)
           .listen((querySnapshot) {
         _emitPaginatedState(querySnapshot.docs);
+      }, onError: (error) {
+        emit(PaginationError(error: error));
       });
     } else {
       final querySnapshot = await localQuery.get();
@@ -85,7 +87,8 @@ class PaginationCubit extends Cubit<PaginationState> {
           previousList: loadedState.documentSnapshots,
         );
       }
-    } on PlatformException catch (exception) {
+    } catch (exception) {
+      emit(PaginationError(error: exception));
       print(exception);
       rethrow;
     }
@@ -99,6 +102,7 @@ class PaginationCubit extends Cubit<PaginationState> {
       final loadedState = state as PaginationLoaded;
       emit(loadedState.copyWith(isLoading: true));
       _lastListener.cancel();
+
       _lastListener = localQuery
           .snapshots(includeMetadataChanges: true)
           .where((s) => s.metadata.isFromCache == false)
@@ -107,6 +111,9 @@ class PaginationCubit extends Cubit<PaginationState> {
           querySnapshot.docs,
           previousList: loadedState.documentSnapshots,
         );
+      }, onError: (error) {
+        print('caught error in listenr on error: $error');
+        emit(PaginationError(error: error));
       });
     }
   }
