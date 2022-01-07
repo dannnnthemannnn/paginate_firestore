@@ -82,7 +82,7 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PaginationCubit, PaginationState>(
-      cubit: _cubit,
+      bloc: _cubit,
       builder: (context, state) {
         if (state is PaginationInitial) {
           return widget.initialLoader;

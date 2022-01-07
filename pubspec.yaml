@@ -10,10 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  bloc: ^6.1.3
-  flutter_bloc: ^6.1.3
+  bloc: ^8.0.2
+  flutter_bloc: ^8.0.1
   cloud_firestore: ^2.4.0
-  provider: ^4.3.3
+  provider: ^6.0.2
 
 dev_dependencies:
   flutter_test:
