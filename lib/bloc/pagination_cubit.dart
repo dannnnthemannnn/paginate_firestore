@@ -15,28 +15,24 @@ class PaginationCubit extends Cubit<PaginationState> {
     this.isLive = false,
   }) : super(PaginationInitial());
 
-  DocumentSnapshot _lastDocument;
-  StreamSubscription<QuerySnapshot> _lastListener;
+  DocumentSnapshot? _lastDocument;
+  StreamSubscription<QuerySnapshot>? _lastListener;
   int _maxIndex = -1;
   bool _loadNewPage = true;
   final int _limit;
   final Query _query;
-  final DocumentSnapshot _startAfterDocument;
+  final DocumentSnapshot? _startAfterDocument;
   final bool isLive;
 
-  final List<StreamSubscription<QuerySnapshot>> _streams =
-      List<StreamSubscription<QuerySnapshot>>();
+  final List<StreamSubscription<QuerySnapshot>> _streams = <StreamSubscription<QuerySnapshot>>[];
 
   void filterPaginatedList(String searchTerm) {
     if (state is PaginationLoaded) {
       final loadedState = state as PaginationLoaded;
 
       final filteredList = loadedState.documentSnapshots
-          .where((document) => document
-              .data()
-              .toString()
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()))
+          .where((document) =>
+              document.data().toString().toLowerCase().contains(searchTerm.toLowerCase()))
           .toList();
 
       emit(loadedState.copyWith(
@@ -84,10 +80,10 @@ class PaginationCubit extends Cubit<PaginationState> {
         final querySnapshot = await localQuery.get();
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot>,
         );
       }
-    } catch (exception) {
+    } on PlatformException catch (exception) {
       emit(PaginationError(error: exception));
       print(exception);
       rethrow;
@@ -101,7 +97,7 @@ class PaginationCubit extends Cubit<PaginationState> {
     } else if (state is PaginationLoaded) {
       final loadedState = state as PaginationLoaded;
       emit(loadedState.copyWith(isLoading: true));
-      _lastListener.cancel();
+      _lastListener?.cancel();
 
       _lastListener = localQuery
           .snapshots(includeMetadataChanges: true)
@@ -109,7 +105,7 @@ class PaginationCubit extends Cubit<PaginationState> {
           .listen((querySnapshot) {
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot>,
         );
       }, onError: (error) {
         print('caught error in listenr on error: $error');
@@ -134,16 +130,18 @@ class PaginationCubit extends Cubit<PaginationState> {
   }
 
   Query _getQuery() {
-    var localQuery = (_lastDocument != null)
-        ? _query.startAfterDocument(_lastDocument)
-        : _startAfterDocument != null
-            ? _query.startAfterDocument(_startAfterDocument)
+    final lastDoc = _lastDocument;
+    final startAfterDoc = _startAfterDocument;
+    var localQuery = (lastDoc != null)
+        ? _query.startAfterDocument(lastDoc)
+        : startAfterDoc != null
+            ? _query.startAfterDocument(startAfterDoc)
             : _query;
     localQuery = localQuery.limit(_limit);
     return localQuery;
   }
 
   void dispose() {
-    _lastListener.cancel();
+    _lastListener?.cancel();
   }
 }
