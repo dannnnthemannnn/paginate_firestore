@@ -15,13 +15,13 @@ class PaginationCubit extends Cubit<PaginationState> {
     this.isLive = false,
   }) : super(PaginationInitial());
 
-  DocumentSnapshot _lastDocument;
-  StreamSubscription<QuerySnapshot> _lastListener;
+  DocumentSnapshot? _lastDocument;
+  StreamSubscription<QuerySnapshot>? _lastListener;
   int _maxIndex = -1;
   bool _loadNewPage = true;
   final int _limit;
   final Query _query;
-  final DocumentSnapshot _startAfterDocument;
+  final DocumentSnapshot? _startAfterDocument;
   final bool isLive;
 
   final List<StreamSubscription<QuerySnapshot>> _streams =
@@ -84,7 +84,7 @@ class PaginationCubit extends Cubit<PaginationState> {
         final querySnapshot = await localQuery.get();
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object>>,
         );
       }
     } catch (exception) {
@@ -101,7 +101,7 @@ class PaginationCubit extends Cubit<PaginationState> {
     } else if (state is PaginationLoaded) {
       final loadedState = state as PaginationLoaded;
       emit(loadedState.copyWith(isLoading: true));
-      _lastListener.cancel();
+      _lastListener!.cancel();
 
       _lastListener = localQuery
           .snapshots(includeMetadataChanges: true)
@@ -109,7 +109,7 @@ class PaginationCubit extends Cubit<PaginationState> {
           .listen((querySnapshot) {
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object>>,
         );
       }, onError: (error) {
         print('caught error in listenr on error: $error');
@@ -135,15 +135,15 @@ class PaginationCubit extends Cubit<PaginationState> {
 
   Query _getQuery() {
     var localQuery = (_lastDocument != null)
-        ? _query.startAfterDocument(_lastDocument)
+        ? _query.startAfterDocument(_lastDocument!)
         : _startAfterDocument != null
-            ? _query.startAfterDocument(_startAfterDocument)
+            ? _query.startAfterDocument(_startAfterDocument!)
             : _query;
     localQuery = localQuery.limit(_limit);
     return localQuery;
   }
 
   void dispose() {
-    _lastListener.cancel();
+    _lastListener!.cancel();
   }
 }

@@ -17,12 +17,11 @@ import 'widgets/initial_loader.dart';
 
 class PaginateFirestore extends StatefulWidget {
   const PaginateFirestore({
-    Key key,
-    @required this.itemBuilder,
-    @required this.query,
-    @required this.itemBuilderType,
-    this.gridDelegate =
-        const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+    Key? key,
+    required this.itemBuilder,
+    required this.query,
+    required this.itemBuilderType,
+    this.gridDelegate = const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
     this.startAfterDocument,
     this.itemsPerPage = 15,
     this.onError,
@@ -50,54 +49,54 @@ class PaginateFirestore extends StatefulWidget {
   final Widget initialLoader;
   final PaginateBuilderType itemBuilderType;
   final int itemsPerPage;
-  final List<ChangeNotifier> listeners;
+  final List<ChangeNotifier>? listeners;
   final EdgeInsets padding;
-  final ScrollPhysics physics;
+  final ScrollPhysics? physics;
   final Query query;
   final bool reverse;
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
   final Axis scrollDirection;
   final Widget separator;
   final bool shrinkWrap;
   final bool isLive;
-  final DocumentSnapshot startAfterDocument;
-  final Widget header;
-  final Widget footer;
+  final DocumentSnapshot? startAfterDocument;
+  final Widget? header;
+  final Widget? footer;
 
   @override
   _PaginateFirestoreState createState() => _PaginateFirestoreState();
 
-  final Widget Function(Exception) onError;
+  final Widget Function(Exception)? onError;
 
   final Widget Function(int, BuildContext, DocumentSnapshot) itemBuilder;
 
-  final void Function(PaginationLoaded) onReachedEnd;
+  final void Function(PaginationLoaded)? onReachedEnd;
 
-  final void Function(PaginationLoaded) onLoaded;
+  final void Function(PaginationLoaded)? onLoaded;
 }
 
 class _PaginateFirestoreState extends State<PaginateFirestore> {
-  PaginationCubit _cubit;
+  PaginationCubit? _cubit;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PaginationCubit, PaginationState>(
-      cubit: _cubit,
+      bloc: _cubit,
       builder: (context, state) {
         if (state is PaginationInitial) {
           return widget.initialLoader;
         } else if (state is PaginationError) {
           return (widget.onError != null)
-              ? widget.onError(state.error)
+              ? widget.onError!(state.error)
               : ErrorDisplay(exception: state.error);
         } else {
           final loadedState = state as PaginationLoaded;
 
           if (widget.onLoaded != null) {
-            widget.onLoaded(loadedState);
+            widget.onLoaded!(loadedState);
           }
           if (loadedState.hasReachedEnd && widget.onReachedEnd != null) {
-            widget.onReachedEnd(loadedState);
+            widget.onReachedEnd!(loadedState);
           }
 
           if (loadedState.documentSnapshots.isEmpty) {
@@ -113,24 +112,24 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
 
   @override
   void dispose() {
-    _cubit.dispose();
+    _cubit!.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     if (widget.listeners != null) {
-      for (var listener in widget.listeners) {
+      for (var listener in widget.listeners!) {
         if (listener is PaginateRefreshedChangeListener) {
           listener.addListener(() {
             if (listener.refreshed) {
-              _cubit.refreshPaginatedList();
+              _cubit!.refreshPaginatedList();
             }
           });
         } else if (listener is PaginateFilterChangeListener) {
           listener.addListener(() {
             if (listener.searchTerm != null && listener.searchTerm.isNotEmpty) {
-              _cubit.filterPaginatedList(listener.searchTerm);
+              _cubit!.filterPaginatedList(listener.searchTerm);
             }
           });
         }
@@ -162,15 +161,14 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 if (index >= loadedState.documentSnapshots.length) {
-                  _cubit.fetchPaginatedList(index);
+                  _cubit!.fetchPaginatedList(index);
                   if (loadedState.isLoading) {
                     return widget.bottomLoader;
                   } else {
                     return SizedBox.shrink();
                   }
                 }
-                return widget.itemBuilder(
-                    index, context, loadedState.documentSnapshots[index]);
+                return widget.itemBuilder(index, context, loadedState.documentSnapshots[index]);
               },
               childCount: loadedState.hasReachedEnd
                   ? loadedState.documentSnapshots.length
@@ -182,9 +180,9 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       ],
     );
 
-    if (widget.listeners != null && widget.listeners.isNotEmpty) {
+    if (widget.listeners != null && widget.listeners!.isNotEmpty) {
       return MultiProvider(
-        providers: widget.listeners
+        providers: widget.listeners!
             .map((_listener) => ChangeNotifierProvider(
                   create: (context) => _listener,
                 ))
@@ -213,15 +211,15 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
                 final itemIndex = index ~/ 2;
                 if (index.isEven) {
                   if (itemIndex >= loadedState.documentSnapshots.length) {
-                    _cubit.fetchPaginatedList(itemIndex);
+                    _cubit!.fetchPaginatedList(itemIndex);
                     if (loadedState.isLoading) {
                       return widget.bottomLoader;
                     } else {
                       return SizedBox.shrink();
                     }
                   }
-                  return widget.itemBuilder(itemIndex, context,
-                      loadedState.documentSnapshots[itemIndex]);
+                  return widget.itemBuilder(
+                      itemIndex, context, loadedState.documentSnapshots[itemIndex]);
                 }
                 return widget.separator;
               },
@@ -246,9 +244,9 @@ class _PaginateFirestoreState extends State<PaginateFirestore> {
       ],
     );
 
-    if (widget.listeners != null && widget.listeners.isNotEmpty) {
+    if (widget.listeners != null && widget.listeners!.isNotEmpty) {
       return MultiProvider(
-        providers: widget.listeners
+        providers: widget.listeners!
             .map((_listener) => ChangeNotifierProvider(
                   create: (context) => _listener,
                 ))

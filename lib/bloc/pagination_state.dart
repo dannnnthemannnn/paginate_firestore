@@ -7,7 +7,7 @@ class PaginationInitial extends PaginationState {}
 
 class PaginationError extends PaginationState {
   final Exception error;
-  PaginationError({@required this.error});
+  PaginationError({required this.error});
 
   @override
   bool operator ==(Object o) {
@@ -22,9 +22,9 @@ class PaginationError extends PaginationState {
 
 class PaginationLoaded extends PaginationState {
   PaginationLoaded({
-    @required this.documentSnapshots,
-    @required this.isLoading,
-    @required this.hasReachedEnd,
+    required this.documentSnapshots,
+    required this.isLoading,
+    required this.hasReachedEnd,
   });
 
   final bool hasReachedEnd;
@@ -32,9 +32,9 @@ class PaginationLoaded extends PaginationState {
   final List<DocumentSnapshot> documentSnapshots;
 
   PaginationLoaded copyWith({
-    bool hasReachedEnd,
-    bool isLoading,
-    List<DocumentSnapshot> documentSnapshots,
+    bool? hasReachedEnd,
+    bool? isLoading,
+    List<DocumentSnapshot>? documentSnapshots,
   }) {
     return PaginationLoaded(
       hasReachedEnd: hasReachedEnd ?? this.hasReachedEnd,
