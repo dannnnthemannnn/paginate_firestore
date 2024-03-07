@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 part 'pagination_state.dart';
 
@@ -25,18 +24,15 @@ class PaginationCubit extends Cubit<PaginationState> {
   final bool isLive;
 
   final List<StreamSubscription<QuerySnapshot>> _streams =
-      List<StreamSubscription<QuerySnapshot>>();
+      List<StreamSubscription<QuerySnapshot>>.empty();
 
   void filterPaginatedList(String searchTerm) {
     if (state is PaginationLoaded) {
       final loadedState = state as PaginationLoaded;
 
       final filteredList = loadedState.documentSnapshots
-          .where((document) => document
-              .data()
-              .toString()
-              .toLowerCase()
-              .contains(searchTerm.toLowerCase()))
+          .where((document) =>
+              document.data().toString().toLowerCase().contains(searchTerm.toLowerCase()))
           .toList();
 
       emit(loadedState.copyWith(
@@ -87,7 +83,7 @@ class PaginationCubit extends Cubit<PaginationState> {
           previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object>>,
         );
       }
-    } catch (exception) {
+    } on Exception catch (exception) {
       emit(PaginationError(error: exception));
       print(exception);
       rethrow;
