@@ -80,7 +80,7 @@ class PaginationCubit extends Cubit<PaginationState> {
         final querySnapshot = await localQuery.get();
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object>>,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object?>>,
         );
       }
     } on Exception catch (exception) {
@@ -105,7 +105,7 @@ class PaginationCubit extends Cubit<PaginationState> {
           .listen((querySnapshot) {
         _emitPaginatedState(
           querySnapshot.docs,
-          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object>>,
+          previousList: loadedState.documentSnapshots as List<QueryDocumentSnapshot<Object?>>,
         );
       }, onError: (error) {
         print('caught error in listenr on error: $error');
